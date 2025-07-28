@@ -1,6 +1,6 @@
 # === Environment Files ===
 .env
-.env.*
+
 
 # === Python Cache ===
 __pycache__/
