@@ -1,4 +1,4 @@
-```markdown
+
 # 🛍️ Pasar ML Agents
 
 Pasar is an **AI-powered marketplace infrastructure** designed for the next generation of commerce.  
