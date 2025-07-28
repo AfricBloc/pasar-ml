@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  # 🔵 Xiara - Conversational Agent
+  xiara:
+    build:
+      context: ./xiara
+      dockerfile: ../docker/xiara.dockerfile
+    container_name: xiara_service
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  # 🔴 Shogun - Security Agent
+  shogun:
+    build:
+      context: ./shogun
+      dockerfile: ../docker/shogun.dockerfile
+    container_name: shogun_service
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  # ⚖️ Resolute - Dispute Resolution Engine
+  resolute:
+    build:
+      context: ./resolute
+      dockerfile: ../docker/resolute.dockerfile
+    container_name: resolute_service
+    ports:
+      - "8003:8003"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  # 💸 Xena - Smart Wallet Agent
+  xena:
+    build:
+      context: ./xena
+      dockerfile: ../docker/xena.dockerfile
+    container_name: xena_service
+    ports:
+      - "8004:8004"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  # 🟢 Redis - Cache & Queue
+  redis:
+    image: redis:7.2
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
