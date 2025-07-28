@@ -1,0 +1,42 @@
+# === ENV FILES (keep secrets out) ===
+.env
+
+
+# === Python Cache ===
+__pycache__/
+*.pyc
+
+# === Virtual Environments ===
+venv/
+.venv/
+env/
+
+# === Jupyter Notebooks & Checkpoints ===
+*.ipynb_checkpoints
+notebooks/.ipynb_checkpoints
+notebooks/*.ipynb
+
+# === OS Files ===
+.DS_Store
+
+# === Logs & Temp ===
+*.log
+logs/
+tmp/
+
+# === Git Metadata ===
+.git
+.gitignore
+
+# === IDE Settings ===
+.vscode/
+.idea/
+
+# === Model Weights & Large Files ===
+*.pt
+*.h5
+*.pkl
+*.joblib
+
+# === Node/NPM Files (if any) ===
+node_modules/
