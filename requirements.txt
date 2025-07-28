@@ -1,0 +1,49 @@
+# === Core Python Version Support ===
+python-dotenv==1.0.1       # Loads .env variables into FastAPI
+
+# === API Framework ===
+fastapi==0.111.0           # Main API framework for all agents
+uvicorn[standard]==0.30.0  # ASGI server for development & production
+
+# === ML / AI ===
+torch==2.3.0               # Core ML framework (CPU version)
+transformers==4.43.1       # Hugging Face for LLMs
+langchain==0.2.7           # Agent orchestration
+langchain-community==0.2.7 # Community integrations (tools, memory)
+llama-index==0.10.52       # Optional: LLM indexing for RAG
+
+# === Vector DBs ===
+weaviate-client==3.26.0    # If using Weaviate for embeddings
+pinecone-client==3.2.0     # Optional alternative vector DB
+
+# === Data Processing ===
+pandas==2.2.2
+numpy==1.26.4
+
+# === NLP & CV ===
+spacy==3.7.5               # NLP for dispute descriptions
+opencv-python==4.10.0.84   # For Resolute Engine image analysis
+scikit-image==0.23.2       # SSIM for image comparison
+scikit-learn==1.5.1        # ML algorithms (Isolation Forest, XGBoost baseline)
+sentence-transformers==3.0.1 # For embeddings & RAG
+
+# === Queue & Cache ===
+redis==5.0.6
+celery==5.4.0              # Async task queue for heavy ML calls
+
+# === Blockchain / Web3 ===
+web3==6.19.0               # For Xena smart wallet + escrow interactions
+eth-account==0.10.0        # Signing wallet transactions
+
+# === Storage ===
+boto3==1.34.142            # Optional (if AWS S3 is used later)
+cloudinary==1.40.0         # For dispute image hosting
+
+# === Testing & Utilities ===
+pytest==8.2.2
+httpx==0.27.0              # Async HTTP requests for internal calls
+loguru==0.7.2              # Cleaner logging
+
+# === Dev Tools ===
+black==24.4.2              # Code formatting
+flake8==7.1.1              # Linting
