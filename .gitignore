@@ -1,0 +1,32 @@
+# === Environment Files ===
+.env
+.env.*
+
+# === Python Cache ===
+__pycache__/
+*.pyc
+
+# === Jupyter Notebooks Cache ===
+*.ipynb_checkpoints
+
+# === Virtual Envs ===
+venv/
+.env/
+.venv/
+
+# === OS Files ===
+.DS_Store
+
+# === Logs & Temp ===
+logs/
+*.log
+tmp/
+
+# === Model Artifacts ===
+*.pt
+*.pkl
+*.h5
+
+# === IDE Files ===
+.vscode/
+.idea/
