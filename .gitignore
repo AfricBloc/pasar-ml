@@ -6,8 +6,10 @@
 __pycache__/
 *.pyc
 
-# === Jupyter Notebooks Cache ===
+# Notebooks
 *.ipynb_checkpoints
+notebooks/.ipynb_checkpoints
+notebooks/*.ipynb
 
 # === Virtual Envs ===
 venv/
