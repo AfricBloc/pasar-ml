@@ -1,25 +1,15 @@
-# main.py – Base template for all Pasar ML agent microservices
-
 from fastapi import FastAPI
 from dotenv import load_dotenv
 import os
 
-# ✅ Load .env variables
 load_dotenv()
 
-# ✅ Initialize FastAPI app
-app = FastAPI(
-    title="Pasar ML Agent",
-    description="Base FastAPI service for Xiara/Shogun/Resolute/Xena",
-    version="0.1.0"
-)
+app = FastAPI(title="Resolute Engine", description="Dispute resolution agent for Pasar", version="0.1")
 
-# ✅ Root healthcheck endpoint
 @app.get("/")
-def read_root():
-    return {"status": "ok", "service": os.getenv("ENVIRONMENT", "development")}
+def health_check():
+    return {"status": "ok", "service": "Resolute", "env": os.getenv("ENVIRONMENT", "development")}
 
-# ✅ Example placeholder endpoint (update per agent)
-@app.post("/ping")
-def ping_service():
-    return {"message": "Service is up and running!"}
+@app.post("/resolute/analyze")
+def analyze_dispute(dispute_id: str):
+    return {"agent": "Resolute", "result": f"Dispute {dispute_id} analysis placeholder"}

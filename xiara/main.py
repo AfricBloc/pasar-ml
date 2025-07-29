@@ -4,22 +4,15 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 import os
 
-# ✅ Load .env variables
+# Load .env variables
 load_dotenv()
 
-# ✅ Initialize FastAPI app
-app = FastAPI(
-    title="Pasar ML Agent",
-    description="Base FastAPI service for Xiara/Shogun/Resolute/Xena",
-    version="0.1.0"
-)
+app = FastAPI(title="Xiara Agent", description="Conversational agent for Pasar", version="0.1")
 
-# ✅ Root healthcheck endpoint
 @app.get("/")
-def read_root():
-    return {"status": "ok", "service": os.getenv("ENVIRONMENT", "development")}
+def health_check():
+    return {"status": "ok", "service": "Xiara", "env": os.getenv("ENVIRONMENT", "development")}
 
-# ✅ Example placeholder endpoint (update per agent)
-@app.post("/ping")
-def ping_service():
-    return {"message": "Service is up and running!"}
+@app.post("/xiara/chat")
+def chat(prompt: str):
+    return {"agent": "Xiara", "response": f"Received prompt: {prompt}"}
