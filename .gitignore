@@ -32,3 +32,17 @@ tmp/
 # === IDE Files ===
 .vscode/
 .idea/
+# === DATA FOLDER RULES ===
+
+data/\*
+!data/.gitkeep
+!data/README.md
+!data/samples/\*\*
+
+# Ignore large raw datasets by default
+
+data/raw/\*
+data/processed/\*
+# Ignore large files in data/raw and data/processed
+data/raw/\*.csv
+data/processed/\*.csv
