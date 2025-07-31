@@ -7,8 +7,8 @@ from contextlib import asynccontextmanager
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shared.config.settings import settings
 from shared.logging.logger import logger
-from api.endpoints import router as extra_router
-from core.prompt_chain import handle_product_query
+from xiara.api.endpoints import router as extra_router
+from xiara.core.prompt_chain import handle_product_query
 
 
 load_dotenv()
