@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shared.config.settings import settings
 from shared.logging.logger import logger
+from api.endpoints import router as extra_router
 
 load_dotenv()
 
@@ -26,3 +30,5 @@ def chat(request: ChatRequest):
     # MVP placeholder: Future - connect LangChain LLM here
     response_text = f"(Xiara MVP) You said: {request.prompt}"
     return {"agent": "Xiara", "response": response_text}
+
+app.include_router(extra_router, prefix="/xiara")
