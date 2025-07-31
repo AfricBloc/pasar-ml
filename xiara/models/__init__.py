@@ -1,1 +1,1 @@
-\"\"\"Xiara Models  Pydantic schemas for requests and responses.\"\"\"
+"""Xiara Models  Pydantic schemas for requests and responses."""
