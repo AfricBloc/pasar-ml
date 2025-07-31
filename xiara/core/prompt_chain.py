@@ -1,6 +1,5 @@
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain.llms.fake import FakeListLLM
+from langchain_community.llms.fake import FakeListLLM
 
 # Static responses for demonstration
 STATIC_RESPONSES = [
@@ -17,8 +16,9 @@ prompt = PromptTemplate(
     template="User asked: {query}\nSuggest relevant products."
 )
 
-chain = LLMChain(llm=llm, prompt=prompt)
+# Create a pipeline using the | operator
+chain = prompt | llm
 
 def handle_product_query(query: str) -> str:
-    # This will cycle through STATIC_RESPONSES for each call
-    return chain.run(query=query)
+    # This is for to invoke the chain with the query
+    return chain.invoke({"query": query})
