@@ -1,24 +1,22 @@
-from langchain.prompts import PromptTemplate
-from langchain_community.llms.fake import FakeListLLM
+from langchain.prompts import ChatPromptTemplate
+from langchain.chains import LLMChain
+from xiara.core.llm_config import llm
 
-# Static responses for demonstration
-STATIC_RESPONSES = [
-    "Here are some noise-cancelling headphones: Product A, Product B.",
-    "For travel, I recommend Product C and Product D.",
-    "Sorry, I couldn't find any matching products."
-]
 
-# Use a fake LLM for static responses (for demo)
-llm = FakeListLLM(responses=STATIC_RESPONSES)
+prompt = ChatPromptTemplate.from_messages([
+    ("system", 
+     "You are Xiara, a knowledgeable and friendly AI assistant for product discovery on the Pasar marketplace.\n"
+     "Understand the user's intent and product needs from natural language, even when no specific category is mentioned.\n\n"
+     "Respond concisely and professionally, focusing on:\n"
+     "- Product features and qualities (e.g., durable, waterproof, compact)\n"
+     "- Product comparisons or recommendations\n"
+     "- Budget considerations if mentioned (e.g., under ₦10,000)\n\n"
+     "Be helpful and clear, like a product expert guiding a shopper."),
+     
+    ("human", "{query}")
+])
 
-prompt = PromptTemplate(
-    input_variables=["query"],
-    template="User asked: {query}\nSuggest relevant products."
-)
-
-# Create a pipeline using the | operator
-chain = prompt | llm
+chain = LLMChain(llm=llm, prompt=prompt)
 
 def handle_product_query(query: str) -> str:
-    # This is for to invoke the chain with the query
-    return chain.invoke({"query": query})
+    return chain.run(query=query)
