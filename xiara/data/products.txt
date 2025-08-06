@@ -1,0 +1,144 @@
+Product Name: TrekMate X100 Hiking Backpack
+Category: Outdoor Gear
+Features: 40L capacity, water-resistant nylon, breathable back padding, multiple compartments
+Price: $79
+Description: A durable hiking backpack ideal for long treks. Comfortable to wear and built to withstand harsh conditions.
+
+Product Name: SoundBeat Pro Wireless Headphones
+Category: Electronics
+Features: Active noise cancellation, 40-hour battery life, Bluetooth 5.2, foldable design
+Price: $129
+Description: Premium wireless headphones with superior sound quality and comfort. Perfect for travel or work.
+
+Product Name: AquaPure Stainless Steel Water Bottle
+Category: Accessories
+Features: 1L capacity, vacuum insulated, keeps drinks cold for 24h or hot for 12h
+Price: $25
+Description: Eco-friendly, reusable water bottle that’s ideal for hikers, gym-goers, and daily commuters.
+
+Product Name: UrbanStride Black Running Shoes
+Category: Footwear
+Features: Lightweight mesh, shock-absorbing soles, breathable design
+Price: $59
+Description: Designed for runners and active individuals. Offers comfort and flexibility with each step.
+
+Product Name: DeskMate Adjustable Laptop Stand
+Category: Office Supplies
+Features: Aluminum frame, foldable, supports 11"–17" laptops, angle adjustment
+Price: $45
+Description: Ergonomic laptop stand to improve posture and reduce neck strain during long work hours.
+
+Product Name: LuxeGlow LED Makeup Mirror
+Category: Beauty
+Features: 3 lighting modes, touch control, 360° rotation, rechargeable battery
+Price: $39
+Description: Sleek LED mirror perfect for makeup application with daylight, warm, and cool lighting.
+
+Product Name: ComfyNest Bamboo Bed Sheets
+Category: Home & Living
+Features: 4-piece set, hypoallergenic, ultra-soft bamboo fibers, cooling effect
+Price: $89
+Description: Luxurious and breathable bed sheets ideal for hot sleepers and sensitive skin.
+
+Product Name: TechNova USB-C Hub 7-in-1
+Category: Electronics
+Features: HDMI output, 3 USB ports, SD/TF reader, 100W charging passthrough
+Price: $35
+Description: A must-have hub for modern laptops, providing all-in-one expansion for peripherals and displays.
+
+Product Name: SkyView Portable Power Bank
+Category: Electronics
+Features: 20000mAh capacity, fast charging, LED display, compact design
+Price: $49
+Description: A reliable power bank for outdoor adventures or daily use, keeping your devices charged on the go.
+
+Product Name: FitFlex Yoga Mat
+Category: Fitness
+Features: Eco-friendly material, non-slip surface, 4mm thickness, easy to clean
+Price: $29
+Description: A high-quality yoga mat for flexibility and comfort during workouts.
+
+Product Name: SmartWatch Pro
+Category: Wearables
+Features: Heart rate monitoring, GPS tracking, notification alerts, water-resistant
+Price: $99
+Description: A feature-packed smartwatch for fitness enthusiasts and busy professionals.
+
+Product Name: CozyCushion Office Chair
+Category: Office Supplies
+Features: Ergonomic design, adjustable height, breathable mesh, lumbar support
+Price: $129
+Description: A comfortable office chair for long work hours, promoting good posture and reducing back pain.
+
+Product Name: ProGrade Camera Lens Kit
+Category: Photography
+Features: 3-piece lens set, aluminum construction, compatible with smartphones
+Price: $69
+Description: A versatile lens kit for mobile photography, capturing stunning portraits and landscapes.
+
+Product Name: GreenGlow Indoor Herb Garden
+Category: Home & Living
+Features: Self-watering system, LED grow lights, compact design, easy to use
+Price: $59
+Description: A smart indoor herb garden for growing fresh herbs year-round, perfect for cooking enthusiasts.
+
+Product Name: SoundWave Bluetooth Speaker
+Category: Electronics
+Features: Waterproof design, 360° sound, long battery life, portable
+Price: $79
+Description: A waterproof Bluetooth speaker for outdoor gatherings or pool parties, delivering high-quality sound.
+
+Product Name: TravelPro Suitcase
+Category: Luggage
+Features: Durable material, 360° spinner wheels, TSA-approved lock, multiple compartments
+Price: $149
+Description: A reliable suitcase for frequent travelers, offering durability and convenience.
+
+Product Name: Petals Fresh Blossom Perfume
+Category: Beauty
+Features: Floral scent, long-lasting fragrance, 50ml bottle
+Price: $29
+Description: A delicate and feminine perfume with a fresh blossom scent, perfect for everyday wear.
+
+Product Name: Nivea Soft Moisturizing Cream
+Category: Skincare
+Features: Rich and creamy texture, 48-hour hydration, suitable for face and body
+Price: $19
+Description: A nourishing moisturizing cream that provides long-lasting hydration and softness to dry skin.
+
+Product Name: Rexona Invisible Deodorant
+Category: Personal Care
+Features: Long-lasting protection, invisible formula, 50ml bottle
+Price: $12
+Description: A reliable deodorant that provides all-day protection against sweat and body odor.
+
+Product Name: Vaseline Intensive Care Advanced Repair Body Lotion
+Category: Skincare
+Features: Deep moisturization, fast absorption, 400ml bottle
+Price: $15
+Description: A rich and nourishing body lotion that provides deep moisturization and repair for dry skin.
+
+Product Name: LuxeGlow Face Cream
+Category: Skincare
+Features: Anti-aging properties, rich and creamy texture, 50g jar
+Price: $49
+Description: A luxurious face cream that provides anti-aging benefits and intense moisturization for a radiant complexion.
+
+Product Name: FreshGlow Exfoliating Face Wash
+Category: Skincare
+Features: Gentle exfoliants, soothing ingredients, 150ml bottle
+Price: $22
+Description: A gentle exfoliating face wash that removes dead skin cells and reveals a brighter complexion.
+
+Product Name: SoftTouch Hand Cream
+Category: Skincare
+Features: Rich and non-greasy formula, intense moisturization, 75ml tube
+Price: $8
+Description: A nourishing hand cream that provides long-lasting moisturization and softness to dry hands.
+
+Product Name: Bloom Beauty Body Oil
+Category: Skincare
+Features: Lightweight and non-greasy formula, nourishing ingredients, 100ml bottle
+Price: $32
+Description: A luxurious body oil that provides hydration and nourishment to dry skin, leaving it soft and supple.
+
