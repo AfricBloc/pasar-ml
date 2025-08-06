@@ -27,6 +27,7 @@ app = FastAPI(
 
 # 📦 Pydantic model for chat endpoint
 class ChatRequest(BaseModel):
+    userId: str
     prompt: str
 
 @app.get("/")
@@ -35,10 +36,10 @@ def health_check():
 
 @app.post("/xiara/chat")
 def chat(request: ChatRequest):
-    logger.info("Xiara received chat prompt: %s", request.prompt)
+    logger.info("Xiara received chat from %s: %s", request.userId, request.prompt)
     # MVP placeholder: LangChain LLM connection
     # In a real implementation, this would connect to an LLM service
-    response_text = handle_product_query(request.prompt)
+    response_text = handle_product_query(request.prompt, user_id=request.userId)
     return {"agent": "Xiara", "response": response_text}
 
 app.include_router(extra_router, prefix="/xiara")
