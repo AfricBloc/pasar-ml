@@ -4,12 +4,16 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+
+# Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Local modules
 from shared.config.settings import settings
 from shared.logging.logger import logger
-from xiara.api.endpoints import router as extra_router
+from xiara.api.endpoints import router as extra_router  # Optional extra Xiara endpoints
+from xiara.api.routes import product_query              # The actual product query route
 from xiara.core.prompt_chain import handle_product_query
-
 
 load_dotenv()
 
@@ -21,25 +25,26 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Xiara Agent",
     description="Conversational agent for Pasar",
-    version="0.1",
+    version="0.1.0",
     lifespan=lifespan
 )
 
-# 📦 Pydantic model for chat endpoint
-class ChatRequest(BaseModel):
-    userId: str
-    prompt: str
-
+# Health check
 @app.get("/")
 def health_check():
     return {"status": "ok", "service": "Xiara", "env": settings.ENVIRONMENT}
 
+# Temporary direct chat endpoint (can be removed once router is used exclusively)
+class ChatRequest(BaseModel):
+    userId: str
+    prompt: str
+
 @app.post("/xiara/chat")
 def chat(request: ChatRequest):
     logger.info("Xiara received chat from %s: %s", request.userId, request.prompt)
-    # MVP placeholder: LangChain LLM connection
-    # In a real implementation, this would connect to an LLM service
     response_text = handle_product_query(request.prompt, user_id=request.userId)
     return {"agent": "Xiara", "response": response_text}
 
+# Include route(s) from product_query.py and extra_router (if used)
+app.include_router(product_query.router)
 app.include_router(extra_router, prefix="/xiara")
