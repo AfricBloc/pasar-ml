@@ -1,5 +1,3 @@
-# xiara/core/vectorstore_loader.py
-
 import os
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings

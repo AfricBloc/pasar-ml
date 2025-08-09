@@ -8,10 +8,14 @@ uvicorn[standard]==0.30.0  # ASGI server for development & production
 # === ML / AI ===
 torch==2.3.0               # Core ML framework (CPU version)
 transformers==4.43.1       # Hugging Face for LLMs
-langchain==0.2.7           # Agent orchestration
-langchain-community==0.2.7 # Community integrations (tools, memory)
-llama-index==0.10.52       # Optional: LLM indexing for RAG
-
+langchain          # Agent orchestration
+langchain-community
+llama-index
+langchain-core
+langsmith
+langchain-text-splitters
+langchain-huggingface # Hugging Face integration
+langchain-embeddings # Embeddings support
 # === Vector DBs ===
 weaviate-client==3.26.0    # If using Weaviate for embeddings
 pinecone-client==3.2.0     # Optional alternative vector DB

@@ -3,19 +3,26 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.document_loaders import TextLoader
+from xiara.core.product_loader import load_all_products
 from langchain.text_splitter import CharacterTextSplitter
 from xiara.core.llm_config import llm
+from xiara.core.vectorstore_loader import get_vectorstore
+import os
 
 # Load & embed product data 
-loader = TextLoader("C:/Users/MOSES/Desktop/PASAR Agentic AI/pasar-ml/xiara/data/products.txt")
-documents = loader.load()
+documents = load_all_products("xiara/data")
 
 splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 docs = splitter.split_documents(documents)
-
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vectorstore = FAISS.from_documents(docs, embedding_model)
+VECTORSTORE_PATH = "xiara/core/faiss_index"
+if not os.path.exists(VECTORSTORE_PATH):
+    vectorstore = FAISS.from_documents(docs, embedding_model)
+    vectorstore.save_local(VECTORSTORE_PATH)
+else:
+    vectorstore = FAISS.load_local(VECTORSTORE_PATH, embedding_model)
+
+vectorstore = get_vectorstore()
 retriever = vectorstore.as_retriever()
 
 # Add memory
@@ -30,21 +37,30 @@ prompt = ChatPromptTemplate.from_messages([
      "- Product features and qualities (e.g., durable, waterproof, compact)\n"
      "- Product comparisons or recommendations\n"
      "- Budget considerations if mentioned (e.g., under ₦10,000)\n\n"
-     "Be helpful and clear, like a product expert guiding a shopper."),
+     "Be helpful and clear, like a product expert guiding a shopper. When appropriate, include product snippets to support your suggestions."),
     ("human", "{question}")
 ])
 
 # Global QA Chain with memory placeholder (we isolate memory using session_id at runtime)
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 qa = ConversationalRetrievalChain.from_llm(
     llm=llm,
     retriever=retriever,
     memory=memory,
-    return_source_documents=False,
+    return_source_documents=True,  # Enabled source document return
     verbose=False
 )
 
-# Per-user handler
+# Per-user handler with snippet formatting
 def handle_product_query(query: str, user_id: str) -> str:
-    return qa.invoke({"question": query}, config={"configurable": {"session_id": user_id}})["answer"]
+    result = qa.invoke({"question": query}, config={"configurable": {"session_id": user_id}})
+    answer = result["answer"]
+    sources = result.get("source_documents", [])
 
+    if sources:
+        snippets = "\n\n🔍 Related Products:\n"
+        for i, doc in enumerate(sources[:3], start=1):
+            content = doc.page_content.strip().replace("\n", " ")
+            snippets += f"{i}. {content}\n"
+        return f"{answer}{snippets}"
+
+    return answer
