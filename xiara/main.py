@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shared.config.settings import settings
 from shared.logging.logger import logger
 from xiara.api.endpoints import router as extra_router  # Optional extra Xiara endpoints
-from xiara.api import product_query              # The actual product query route
+from xiara.api.product_query import router as product_query_router              # The actual product query route
 from xiara.core.prompt_chain import handle_product_query
 
 load_dotenv()
@@ -56,5 +56,5 @@ def chat(request: ChatRequest):
         }
 
 # Include route(s) from product_query.py and extra_router (if used)
-app.include_router(product_query.router)
+app.include_router(product_query_router)
 app.include_router(extra_router, prefix="/xiara")
