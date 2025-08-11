@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+# xiara/core/vectorstore_loader.py
+
+>>>>>>> a31d99d0b062efdb674c9e318c9236551a31e903
 import os
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
