@@ -28,7 +28,12 @@ tmp/
 *.pt
 *.pkl
 *.h5
-.gguf
+# Large model and binary files
+*.gguf
+*.lib
+*.dll
+*.pyd
+
 # === IDE Files ===
 .vscode/
 .idea/
