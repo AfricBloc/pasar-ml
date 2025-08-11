@@ -23,12 +23,12 @@ venv/
 logs/
 *.log
 tmp/
-
+.cpp
 # === Model Artifacts ===
 *.pt
 *.pkl
 *.h5
-
+.gguf
 # === IDE Files ===
 .vscode/
 .idea/
