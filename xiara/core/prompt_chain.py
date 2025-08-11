@@ -13,6 +13,7 @@ import os
 # Load & embed product data
 documents = load_all_products("xiara/data")
 
+# Split Documents
 splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 docs = splitter.split_documents(documents)
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -26,7 +27,7 @@ else:
 vectorstore = get_vectorstore()
 retriever = vectorstore.as_retriever()
 
-# Add memory
+# Add memory (per user)
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 # Define prompt
@@ -42,12 +43,13 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{question}")
 ])
 
-# Global QA Chain
+# Global QA Chain with memory placeholder (we isolate memory using session_id at runtime)
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 qa = ConversationalRetrievalChain.from_llm(
     llm=llm,
     retriever=retriever,
     memory=memory,
-    return_source_documents=True,
+    return_source_documents=False,
     verbose=False
 )
 
