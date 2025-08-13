@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import ConversationalRetrievalChain
 from langchain_community.vectorstores import FAISS
@@ -11,7 +12,10 @@ from xiara.core.user_profile_manager import get_user_profile, save_user_profile,
 from xiara.core.memory_manager import get_memory  # 🔹 New centralized memory import
 
 # Load & embed product data (if vectorstore is missing)
-documents = load_all_products()
+load_dotenv()
+DATA_PATH = os.getenv("DATA_PATH")
+
+documents = load_all_products(DATA_PATH)
 splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 docs = splitter.split_documents(documents)
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
