@@ -5,7 +5,7 @@ import redis
 import os
 
 # Redis connection
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:10920")
 redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
 
 class UserProfile(BaseModel):
