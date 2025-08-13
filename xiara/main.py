@@ -38,7 +38,6 @@ app = FastAPI(
 def health_check():
     return {"status": "ok", "service": "Xiara", "env": settings.ENVIRONMENT}
 
-
 # Temporary direct chat endpoint (can be removed once router is used exclusively)
 class ChatRequest(BaseModel):
     userId: str
@@ -64,3 +63,4 @@ def chat(request: ChatRequest):
 app.include_router(product_query_router)
 app.include_router(extra_router, prefix="/xiara")
 app.include_router(user_profile.router, prefix="/xiara")
+

@@ -11,7 +11,7 @@ from xiara.core.user_profile_manager import get_user_profile, save_user_profile,
 import os
 
 # Load & embed product data
-documents = load_all_products("xiara/data")
+documents = load_all_products()
 
 # Split Documents
 splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
@@ -22,11 +22,13 @@ if not os.path.exists(VECTORSTORE_PATH):
     vectorstore = FAISS.from_documents(docs, embedding_model)
     vectorstore.save_local(VECTORSTORE_PATH)
 else:
-    vectorstore = FAISS.load_local(VECTORSTORE_PATH, embedding_model)
+    vectorstore = FAISS.load_local(VECTORSTORE_PATH, embedding_model, allow_dangerous_deserialization=True)
 
 vectorstore = get_vectorstore()
+if vectorstore is None:
+    raise ValueError("Vectorstore could not be loaded. Please check the vectorstore initialization.")
 retriever = vectorstore.as_retriever()
-
+    
 # Add memory (per user)
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
