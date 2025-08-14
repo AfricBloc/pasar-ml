@@ -9,12 +9,13 @@ from xiara.core.product_loader import load_all_products
 from xiara.core.llm_config import llm
 from xiara.core.vectorstore_loader import get_vectorstore
 from xiara.core.user_profile_manager import get_user_profile, save_user_profile, UserProfile
-from xiara.core.memory_manager import get_memory  # 🔹 New centralized memory import
+from xiara.core.memory_manager import get_memory
+from xiara.core.ambiguity_detector import is_ambiguous  # 🔹 Use improved ambiguity detection
 
-# Load & embed product data (if vectorstore is missing)
 load_dotenv()
 DATA_PATH = os.getenv("DATA_PATH")
 
+# Load & embed product data (if vectorstore missing)
 documents = load_all_products(DATA_PATH)
 splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 docs = splitter.split_documents(documents)
@@ -28,7 +29,7 @@ else:
     vectorstore = get_vectorstore()
 
 if vectorstore is None:
-    raise ValueError("Vectorstore could not be loaded. Please check the vectorstore initialization.")
+    raise ValueError("Vectorstore could not be loaded. Please check initialization.")
 
 retriever = vectorstore.as_retriever()
 
@@ -36,18 +37,17 @@ retriever = vectorstore.as_retriever()
 prompt = ChatPromptTemplate.from_messages([
     ("system",
      "You are Xiara, a knowledgeable and friendly AI assistant for product discovery on the Pasar marketplace.\n"
-     "Understand the user's intent and product needs from natural language, even when no specific category is mentioned.\n\n"
+     "Understand the user's intent and product needs from natural language.\n\n"
      "Respond concisely and professionally, focusing on:\n"
-     "- Product features and qualities (e.g., durable, waterproof, compact)\n"
+     "- Product features and qualities\n"
      "- Product comparisons or recommendations\n"
-     "- Budget considerations if mentioned (e.g., under ₦10,000)\n"
-     "Be helpful and clear, like a product expert guiding a shopper. When appropriate, include product snippets to support your suggestions."),
+     "- Budget considerations if mentioned\n"
+     "When appropriate, include product snippets."),
     ("human", "{question}")
 ])
 
-# Build QA Chain per user
 def build_user_chain(user_id: str):
-    """Return a QA chain with memory isolated per user."""
+    """Return QA chain with per-user memory."""
     memory = get_memory(session_id=user_id)
     return ConversationalRetrievalChain.from_llm(
         llm=llm,
@@ -57,35 +57,34 @@ def build_user_chain(user_id: str):
         verbose=False
     )
 
-# Update user profile history
 def update_user_history(user_id: str, query: str):
     profile = get_user_profile(user_id)
     if profile is None:
         profile = UserProfile(user_id=user_id)
-
     if not hasattr(profile, "history"):
         profile.history = []
-
     profile.history.append(query)
-    profile.history = profile.history[-10:]  # Keep last 10 queries
+    profile.history = profile.history[-10:]
     save_user_profile(profile)
 
-# Handle queries
-# Per-user handler with snippet formatting + profile update
 def handle_product_query(query: str, user_id: str) -> str:
+    """Main query handler with ambiguity detection + multi-turn memory."""
+    
+    # Ambiguity check first
+    if is_ambiguous(query, user_id=user_id):
+        return f"Xiara Could you clarify? For example, what type of product are you referring to when you say: '{query}'?"
+
     # Update personalization history
     update_user_history(user_id, query)
 
-    # Build user-specific QA chain
+    # Build chain and answer
     qa = build_user_chain(user_id)
-    memory = qa.memory  # For debug logging below
-
-    # Get LLM answer
     result = qa.invoke({"question": query}, config={"configurable": {"session_id": user_id}})
     answer = result["answer"]
     sources = result.get("source_documents", [])
 
-    # DEBUG: Log current conversation memory for this user
+    # DEBUG: Print current conversation history
+    memory = qa.memory
     if hasattr(memory, "chat_memory"):
         print(f"\n--- Chat history for {user_id} ---")
         for idx, msg in enumerate(memory.chat_memory.messages, start=1):
