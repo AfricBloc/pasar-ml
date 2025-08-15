@@ -18,8 +18,8 @@ class AmbiguityDetector:
             # Add beauty/personal care products
             "cream", "lotion", "moisturizer", "soap", "shampoo", "deodorant",
             # Add common brands
-            "nivea", "samsung", "apple", "nike", "adidas",
-      
+            "nivea", "samsung", "apple", "nike", "adidas","apple","dell","hp","lenovo"
+
         }
 
         # Attributes / descriptors that reduce ambiguity
@@ -57,7 +57,7 @@ class AmbiguityDetector:
 
         # If query contains both a brand and a product type, it's specific enough
         words = set(query_lower.split())
-        has_brand = any(brand in words for brand in {"nivea", "samsung", "apple", "nike", "adidas"})
+        has_brand = any(brand in words for brand in {"nivea", "samsung", "apple", "nike", "adidas", "dell", "hp", "lenovo"})
         has_product = any(prod in words for prod in self.PRODUCT_HINTS)
         
         if has_brand and has_product:

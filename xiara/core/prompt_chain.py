@@ -82,7 +82,9 @@ def handle_product_query(query: str, user_id: str) -> str:
     # Check for ambiguity
     is_ambiguous, ambiguity_type = ambiguity_detector.is_ambiguous(query, user_id=user_id)
     if is_ambiguous:
-        return ambiguity_detector.generate_clarification(ambiguity_type)
+        # Ensure ambiguity_type is a string
+        clarification_type = ambiguity_type if ambiguity_type is not None else "general"
+        return ambiguity_detector.generate_clarification(clarification_type)
 
     # Update user history
     update_user_history(user_id, query)
