@@ -8,7 +8,7 @@ but can be switched to RedisMemory by changing USE_REDIS to True.
 from langchain.memory import ConversationBufferMemory
 
 # Toggle this to switch memory backends later
-USE_REDIS = False
+USE_REDIS = False  # Set to True to use RedisMemory
 
 def get_memory(session_id: str = "default_session"):
     """
@@ -25,12 +25,14 @@ def get_memory(session_id: str = "default_session"):
         return ConversationBufferMemory(
             memory_key="chat_history",
             return_messages=True,
-            chat_memory=history
+            chat_memory=history,
+            output_key="answer"
         )
 
     else:
         # Default: In-memory buffer (no persistence)
         return ConversationBufferMemory(
             memory_key="chat_history",
-            return_messages=True
+            return_messages=True,
+            output_key="answer"
         )

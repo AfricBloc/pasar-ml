@@ -58,7 +58,13 @@ def chat(request: ChatRequest):
             "agent": "Xiara",
             "response": "Sorry, I encountered an error trying to respond to your request."
         }
-
+# Startup event to log RAG mode
+@app.on_event("startup")
+async def startup_event():
+    use_rag = os.getenv("USE_RAG", "true").lower() == "true"
+    mode = "RAG (Retrieval-Augmented Generation)" if use_rag else "LLM-only"
+    print(f"\n Xiara is running in {mode} mode\n")
+    
 # Include route(s) from product_query.py and extra_router (if used)
 app.include_router(product_query_router)
 app.include_router(extra_router, prefix="/xiara")

@@ -80,6 +80,9 @@ class NegotiationHandler:
             return (f"I understand you're looking for a better deal. "
                    f"I can offer it at ${new_offer:.2f}. How does that sound?")
 
+        # Default response if intent is not recognized
+        return "I'm sorry, I didn't understand your request. Could you please clarify?"
+
     def reset_negotiation(self, user_id: str):
         """Reset negotiation state for a user"""
         if user_id in self.active_negotiations:
