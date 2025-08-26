@@ -1,4 +1,6 @@
+# xiara/core/prompt_chain.py
 import os
+import re
 from dotenv import load_dotenv
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import ConversationalRetrievalChain, LLMChain
@@ -11,14 +13,56 @@ from xiara.core.vectorstore_loader import get_vectorstore
 from xiara.core.user_profile_manager import get_user_profile, save_user_profile, UserProfile
 from xiara.core.memory_manager import get_memory
 from xiara.core.ambiguity_detector import AmbiguityDetector
-
+import re
+from xiara.core.memory_manager import get_last_query, set_last_query
 # Load env vars
 load_dotenv()
 DATA_PATH = os.getenv("DATA_PATH")
-USE_RAG = os.getenv("USE_RAG", "true").lower() == "true"  # Toggle: true/false in .env
+USE_RAG = os.getenv("USE_RAG", "true").lower() == "true"
 ambiguity_detector = AmbiguityDetector()
 
-# Load & embed product data (if RAG is enabled)
+# Helper: split multi-product queries
+def split_multi_product_query(query: str):
+    """
+    Splits a query into sub-queries if multiple products are mentioned,
+    and propagates shared constraints (budget, brand, etc.) to all parts.
+
+    Example:
+      "I want waterproof hiking boots under ₦20,000 and a backpack"
+      -> ["I want waterproof hiking boots under ₦20,000",
+          "I want a backpack under ₦20,000"]
+    """
+    # Normalize
+    q = query.strip()
+
+    # Detect budget/constraints
+    budget_match = re.search(r"(under|below|less than)\s*₦?\s*[\d,]+", q, re.IGNORECASE)
+    budget_text = budget_match.group(0) if budget_match else ""
+
+    # Replace connectors with |
+    connectors = [" and ", ",", " as well as ", " plus ", " together with "]
+    q_lower = q.lower()
+    for conn in connectors:
+        q_lower = q_lower.replace(conn, "|")
+
+    # Split parts
+    parts = [p.strip().capitalize() for p in q_lower.split("|") if p.strip()]
+
+    sub_queries = []
+    for i, part in enumerate(parts):
+        if not re.search(r"(buy|want|looking|need|search|recommend)", part, re.IGNORECASE):
+            part = "I want " + part
+
+        # If a budget/constraint exists in original query but not this part, add it
+        if budget_text and budget_text.lower() not in part.lower():
+            part = f"{part} {budget_text}"
+
+        sub_queries.append(part)
+
+    return sub_queries
+
+
+# Load vectorstore if RAG enabled
 if USE_RAG:
     documents = load_all_products(DATA_PATH)
     splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
@@ -36,29 +80,21 @@ if USE_RAG:
         raise ValueError("Vectorstore could not be loaded. Please check initialization.")
     retriever = vectorstore.as_retriever()
 else:
-    retriever = None  # fallback mode
+    retriever = None
 
-# Prompt Template
+# Prompt template
 prompt = ChatPromptTemplate.from_messages([
     ("system",
-     "You are Xiara, a knowledgeable and friendly AI assistant for product discovery on the Pasar marketplace.\n"
-     "Understand the user's intent and product needs from natural language.\n\n"
-     "If a query is ambiguous:\n"
-     "- Ask for clarification about product type or category\n"
-     "- Maintain context from previous messages\n"
-     "- Guide users towards specific product details\n\n"
-     "For clear queries, respond concisely focusing on:\n"
-     "- Product features and qualities\n"
-     "- Product comparisons or recommendations\n"
-     "- Budget considerations if mentioned\n"
-     "When appropriate, include product snippets."),
+     "You are Xiara, a conversational and friendly AI shopping assistant for the Pasar marketplace.\n"
+     "Understand user intent and respond naturally in multi-turn conversations.\n"
+     "If query is ambiguous, ask for clarification.\n"
+     "If query is clear, respond with useful product recommendations.\n"
+     "Keep responses conversational, concise, and engaging."),
     ("human", "{question}")
 ])
 
 def build_user_chain(user_id: str):
-    """Return chain depending on USE_RAG flag."""
     memory = get_memory(session_id=user_id)
-
     if USE_RAG:
         return ConversationalRetrievalChain.from_llm(
             llm=llm,
@@ -68,12 +104,7 @@ def build_user_chain(user_id: str):
             verbose=False
         )
     else:
-        return LLMChain(
-            llm=llm,
-            prompt=prompt,
-            memory=memory,
-            verbose=False
-        )
+        return LLMChain(llm=llm, prompt=prompt, memory=memory, verbose=False)
 
 def update_user_history(user_id: str, query: str):
     profile = get_user_profile(user_id)
@@ -86,57 +117,86 @@ def update_user_history(user_id: str, query: str):
     save_user_profile(profile)
 
 def handle_product_query(query: str, user_id: str) -> str:
-    """Main handler with ambiguity + RAG toggle."""
-    # Check for ambiguity
+    """Main handler with ambiguity, multi-product, context updates, and RAG toggle."""
+    # Check for ambiguity first
     is_ambiguous, ambiguity_type = ambiguity_detector.is_ambiguous(query, user_id=user_id)
     if is_ambiguous:
         clarification_type = ambiguity_type if ambiguity_type else "general"
         return ambiguity_detector.generate_clarification(clarification_type)
+    
+     # Retrieve last query context
+    last_query = get_last_query(user_id)
+
+    # Detect update words like "actually", "make it", "instead", "change"
+    if last_query and re.search(r"(actually|instead|make it|change|update|no,)", query.lower()):
+        # Merge by replacing budget or product details in last query
+        updated_query = re.sub(r"(under\s*₦?\d+)", query, last_query, flags=re.IGNORECASE)
+        if updated_query == last_query:
+            # if no budget pattern found, append modification
+            updated_query = f"{last_query}, but {query}"
+        query = updated_query
+
+    # Save structured query in memory
+    set_last_query(user_id, query)
+
 
     # Update profile history
     update_user_history(user_id, query)
 
-    # Build user chain
+    # Build chain
     qa = build_user_chain(user_id)
 
-    # Run query
-    try:
-        if USE_RAG:
-            result = qa.invoke({"question": query}, config={"configurable": {"session_id": user_id}})
-            
-            # Handle different response formats gracefully
-            if isinstance(result, dict):
-                answer = result.get("answer") or result.get("text") or result.get("response") or "I'm sorry, I couldn't generate a response."
-                sources = result.get("source_documents", [])
-                
-                if sources:
-                    snippets = "\n\nRelated Products:\n"
-                    for i, doc in enumerate(sources[:3], start=1):
-                        content = doc.page_content.strip().replace("\n", " ")
-                        snippets += f"{i}. {content}\n"
-                    return f"{answer}{snippets}"
-                
-                return f"{answer}\n\nI couldn't find exact product matches. Could you specify the product type, features, or budget?"
+    # Split multi-product queries
+    sub_queries = split_multi_product_query(query)
+    all_responses = []
+
+    for sub_q in sub_queries:
+        try:
+            if USE_RAG:
+                result = qa.invoke({"question": sub_q}, config={"configurable": {"session_id": user_id}})
+                if isinstance(result, dict):
+                    answer = (
+                        result.get("answer")
+                        or result.get("result")
+                        or result.get("text")
+                        or result.get("response")
+                        or "I'm not sure."
+                    )
+                    sources = result.get("source_documents", [])
+                    if sources:
+                        snippets = []
+                        for i, doc in enumerate(sources[:2], start=1):  # max 2 per product
+                            content = doc.page_content.strip().replace("\n", " ")
+                            snippets.append(f"- {content}")
+                        if snippets:
+                            answer += "\n  Related products:\n  " + "\n  ".join(snippets)
+                else:
+                    answer = str(result)
             else:
-                # Handle string responses
-                return str(result)
-                
-        else:
-            result = qa.invoke({"question": query})
-            
-            # Handle different response formats gracefully
-            if isinstance(result, dict):
-                response_text = result.get("text") or result.get("answer") or result.get("response") or str(result)
-                return str(response_text)
-            else:
-                return str(result)
-                
-    except KeyError as e:
-        # Fallback for any KeyError issues
-        return f"I'm sorry, I encountered an issue processing your request. Please try rephrasing your question."
-    except Exception as e:
-        # General error handling
-        return f"I'm sorry, I encountered an error processing your request. Please try again."
+                result = qa.invoke({"question": sub_q})
+                answer = (
+                    result.get("answer")
+                    or result.get("result")
+                    or result.get("text")
+                    or result.get("response")
+                    or str(result)
+                    if isinstance(result, dict) else str(result)
+                )
+
+            all_responses.append((sub_q, answer))
+
+        except Exception as e:
+            all_responses.append((sub_q, f"Sorry, I had trouble with that query: {e}"))
+
+    # Merge into conversational flow
+    if len(all_responses) == 1:
+        return all_responses[0][1]  # just one product, return directly
+    else:
+        final = "Here's what I found for you:\n\n"
+        for sub_q, ans in all_responses:
+            final += f"For **{sub_q}**:\n{ans}\n\n"
+        return final.strip()
+
 
 def get_conversation_context(user_id: str) -> str:
     memory = get_memory(session_id=user_id)
