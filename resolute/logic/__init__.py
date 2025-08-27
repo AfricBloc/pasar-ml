@@ -1,1 +1,1 @@
-\"\"\"Resolute Logic  business logic and decision rules for dispute cases.\"\"\"
+"""Resolute Logic  business logic and decision rules for dispute cases."""
