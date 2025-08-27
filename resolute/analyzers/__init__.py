@@ -1,1 +1,1 @@
-\"\"\"Resolute Analyzers  modules for image, text, and evidence analysis.\"\"\"
+"""Resolute Analyzers  modules for image, text, and evidence analysis."""
