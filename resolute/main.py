@@ -1,30 +1,34 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from shared.config.settings import settings
 from shared.logging.logger import logger
+from resolute.api.routes import router as resolute_router
 
 load_dotenv()
 
-app = FastAPI(title="Resolute Engine", description="Dispute resolution agent for Pasar", version="0.1")
-
-# 📦 Pydantic model for dispute analysis
-class DisputeRequest(BaseModel):
-    dispute_id: str
-    buyer_claim: str
-    seller_response: str
+app = FastAPI(
+    title="Resolute Engine",
+    description="Dispute resolution agent for Pasar",
+    version="0.1"
+)
 
 @app.on_event("startup")
 def startup_event():
-    logger.info("🚀 Resolute Engine started in %s mode", settings.ENVIRONMENT)
+    logger.info("Resolute Engine started", extra={"env": settings.ENVIRONMENT})
 
 @app.get("/")
 def health_check():
     return {"status": "ok", "service": "Resolute", "env": settings.ENVIRONMENT}
 
-@app.post("/resolute/analyze")
-def analyze_dispute(request: DisputeRequest):
-    logger.info("Resolute analyzing dispute %s", request.dispute_id)
-    # MVP placeholder: dummy verdict logic
-    verdict = "escalate" if "damage" in request.buyer_claim.lower() else "reject"
-    return {"agent": "Resolute", "dispute_id": request.dispute_id, "verdict": verdict}
+@app.middleware("http")
+async def add_request_context(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as e:
+        logger.exception("Unhandled exception", extra={"path": request.url.path})
+        return JSONResponse({"detail": "Internal Server Error"}, status_code=500)
+
+# All API endpoints live in routes.py
+app.include_router(resolute_router, prefix="/resolute", tags=["resolute"])

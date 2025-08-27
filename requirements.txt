@@ -1,6 +1,6 @@
 # === Core Python Version Support ===
 python-dotenv==1.0.1       # Loads .env variables into FastAPI
-
+python-multipart
 # === API Framework ===
 fastapi==0.111.0           # Main API framework for all agents
 uvicorn[standard]==0.30.0  # ASGI server for development & production
@@ -16,6 +16,7 @@ langsmith
 langchain-text-splitters
 langchain-huggingface # Hugging Face integration
 langchain-embeddings # Embeddings support
+torchvision
 # === Vector DBs ===
 weaviate-client==3.26.0    # If using Weaviate for embeddings
 pinecone-client==3.2.0     # Optional alternative vector DB
@@ -30,7 +31,6 @@ opencv-python==4.10.0.84   # For Resolute Engine image analysis
 scikit-image==0.23.2       # SSIM for image comparison
 scikit-learn==1.5.1        # ML algorithms (Isolation Forest, XGBoost baseline)
 sentence-transformers==3.0.1 # For embeddings & RAG
-
 # === Queue & Cache ===
 redis==5.0.6
 celery==5.4.0              # Async task queue for heavy ML calls
@@ -51,3 +51,4 @@ loguru==0.7.2              # Cleaner logging
 # === Dev Tools ===
 black==24.4.2              # Code formatting
 flake8==7.1.1              # Linting
+#python -m spacy download en_core_web_md #Download SpaCy model

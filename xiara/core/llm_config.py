@@ -1,3 +1,4 @@
+# xiara/core/llm_config.py
 from langchain_community.llms import LlamaCpp
 from dotenv import load_dotenv
 import os
@@ -11,6 +12,8 @@ llm = LlamaCpp(
     n_ctx=2048,
     temperature=0.7,
     top_p=0.95,
-    verbose=True,
-    n_threads=4
+    verbose=False,
+    n_threads=os.cpu_count() or 8,  # Use all CPU threads
+    n_batch=512,  # Larger batch → faster throughput
+    max_tokens=512,  # Prevent long rambles
 )

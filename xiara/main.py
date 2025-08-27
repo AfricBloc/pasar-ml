@@ -43,21 +43,30 @@ class ChatRequest(BaseModel):
     userId: str
     prompt: str
 
+from fastapi.responses import JSONResponse
+
 @app.post("/xiara/chat")
 def chat(request: ChatRequest):
     logger.info(f"Xiara received chat from {request.userId}: {request.prompt}")
     try:
         answer = handle_product_query(request.prompt, user_id=request.userId)
-        return {
-            "agent": "Xiara",
-            "response": answer
-        }
+        return JSONResponse(
+            content={"agent": "Xiara", "response": answer, "userId": request.userId},
+            media_type="application/json; charset=utf-8",
+            status_code=200
+        )
     except Exception as e:
-        logger.error(f"Xiara failed to respond: {e}")
-        return {
-            "agent": "Xiara",
-            "response": "Sorry, I encountered an error trying to respond to your request."
-        }
+        logger.error(f"Xiara failed to respond: {e}", exc_info=True)
+        return JSONResponse(
+            content={
+                "agent": "Xiara",
+                "response": "Sorry, I encountered an error trying to respond to your request.",
+                "userId": request.userId
+            },
+            media_type="application/json; charset=utf-8",
+            status_code=500
+        )
+
 # Startup event to log RAG mode
 @app.on_event("startup")
 async def startup_event():
