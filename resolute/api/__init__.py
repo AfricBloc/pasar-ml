@@ -1,1 +1,1 @@
-\"\"\"Resolute API – FastAPI routes for dispute resolution endpoints.\"\"\"
+"""Resolute API - FastAPI routes for dispute resolution endpoints."""
