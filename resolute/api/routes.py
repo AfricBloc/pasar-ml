@@ -23,9 +23,9 @@ def auth_guard(authorization: Optional[str] = Header(None)):
     return True
 
 @router.post("/analyze", response_model=AnalyzeResponse)
-def analyze(req: AnalyzeRequest, request: Request = Depends(auth_guard)):
+def analyze(req: AnalyzeRequest, _: bool = Depends(auth_guard)):
     logger.info("Analyze request received", extra={"orderId": req.orderId, "productId": req.productId})
-
+   
     try:
         buyer_items, seller_items = load_local_images(
             req.disputeDetails.buyer_image_paths, 
