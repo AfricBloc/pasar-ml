@@ -4,18 +4,21 @@ from dotenv import load_dotenv
 from shared.config.settings import settings
 from shared.logging.logger import logger
 from resolute.api.routes import router as resolute_router
+from contextlib import asynccontextmanager
 
 load_dotenv()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Resolute Engine started", extra={"env": settings.ENVIRONMENT})
+    yield
 
 app = FastAPI(
     title="Resolute Engine",
     description="Dispute resolution agent for Pasar",
-    version="0.1"
+    version="0.1",
+    lifespan=lifespan
 )
-
-@app.on_event("startup")
-def startup_event():
-    logger.info("Resolute Engine started", extra={"env": settings.ENVIRONMENT})
 
 @app.get("/")
 def health_check():
