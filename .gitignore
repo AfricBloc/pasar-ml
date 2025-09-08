@@ -56,3 +56,4 @@ data/processed/\*.csv
 # Keep template fixture, ignore real ones
 tests/fixtures/*.json
 !tests/fixtures/analyze_payload_template.json
+
