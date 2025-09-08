@@ -52,3 +52,10 @@ data/processed/\*
 # Ignore large files in data/raw and data/processed
 data/raw/\*.csv
 data/processed/\*.csv
+
+# Local data & fixtures
+tests/fixtures/*.png
+tests/fixtures/*.jpg
+tests/fixtures/*.jpeg
+tests/fixtures/*.json
+data/

@@ -30,7 +30,11 @@ async def add_request_context(request: Request, call_next):
         response = await call_next(request)
         return response
     except Exception as e:
-        logger.exception("Unhandled exception", extra={"path": request.url.path})
+        logger.exception(
+            f"Unhandled exception at {request.url.path}: {e}",
+            exc_info=True,  # ensures traceback is included
+            extra={"path": request.url.path, "error": str(e), "type": type(e).__name__}
+        )
         return JSONResponse({"detail": "Internal Server Error"}, status_code=500)
 
 # All API endpoints live in routes.py

@@ -52,3 +52,4 @@ loguru==0.7.2              # Cleaner logging
 black==24.4.2              # Code formatting
 flake8==7.1.1              # Linting
 #python -m spacy download en_core_web_md #Download SpaCy model
+#install cmake from visualstudio

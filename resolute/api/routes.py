@@ -6,10 +6,15 @@ from .schemas import (
 )
 from resolute.logic.verdict_engine import make_verdict
 from resolute.api.evidence_fetcher import load_local_images
-from resolute.analyzers.image_analyzer import ssim_compare_images, resnet_cosine_pair
+from resolute.analyzers.image_analyzer import (
+    ssim_compare_images,
+    resnet_cosine_pair,
+    compare_color_histograms
+)
 from resolute.analyzers.text_checker import analyze_claim_vs_description
 from shared.auth.auth_utils import verify_internal_token    
 from shared.logging.logger import logger
+from shared.config.settings import settings  
 
 router = APIRouter()
 
@@ -17,7 +22,17 @@ def auth_guard(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(status_code=401, detail="Missing bearer token")
     token = authorization.split(" ", 1)[1]
-    mock_request = Request(scope={"type": "http", "headers": [(b"authorization", f"Bearer {token}".encode())]})
+
+    # Dev-mode bypass for local testing
+    if settings.ENVIRONMENT == "dev" and token == "test-token":
+        logger.info("Dev token accepted for testing")
+        return True
+
+    # Normal path → real validation
+    mock_request = Request(scope={
+        "type": "http",
+        "headers": [(b"authorization", f"Bearer {token}".encode())]
+    })
     if not verify_internal_token(mock_request):
         raise HTTPException(status_code=403, detail="Invalid token")
     return True
@@ -37,17 +52,20 @@ def analyze(req: AnalyzeRequest, _: bool = Depends(auth_guard)):
     image_results: List[ImageAnalysisResult] = []
 
     if buyer_items and seller_items:
-        # SSIM
-        ssim_score = ssim_compare_images(buyer_items[0].path, seller_items[0].path)
+        buyer_path = buyer_items[0].path
+        seller_path = seller_items[0].path
+
+        # --- SSIM ---
+        ssim_score = ssim_compare_images(buyer_path, seller_path)
         image_results.append(ImageAnalysisResult(
             method="ssim",
             score=ssim_score,
             mismatch=ssim_score < 0.5
         ))
 
-        # ResNet cosine
+        # --- ResNet cosine ---
         try:
-            cos_score = resnet_cosine_pair(buyer_items[0].path, seller_items[0].path)
+            cos_score = resnet_cosine_pair(buyer_path, seller_path)
             image_results.append(ImageAnalysisResult(
                 method="resnet",
                 score=cos_score,
@@ -56,12 +74,24 @@ def analyze(req: AnalyzeRequest, _: bool = Depends(auth_guard)):
         except Exception as e:
             logger.warning("ResNet skipped", extra={"reason": str(e)})
 
+        # --- Color Histogram ---
+        try:
+            color_score = compare_color_histograms(buyer_path, seller_path)
+            image_results.append(ImageAnalysisResult(
+                method="color_histogram",
+                score=color_score,
+                mismatch=color_score < 0.75   # threshold for color mismatch
+            ))
+        except Exception as e:
+            logger.warning("Color histogram skipped", extra={"reason": str(e)})
+
+    # --- Text Analysis ---
     text_res = analyze_claim_vs_description(
         req.disputeDetails.claim_text, 
         req.disputeDetails.product_description
     )
 
-    # pass dicts to verdict engine
+    # --- Verdict ---
     verdict, confidence, report = make_verdict(image_results, text_res.dict())
 
     resp = AnalyzeResponse(

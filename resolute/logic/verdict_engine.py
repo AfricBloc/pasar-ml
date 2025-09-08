@@ -9,7 +9,7 @@ def make_verdict(
     Combine image + text analysis results into a verdict.
 
     Args:
-        image_results: List of ImageAnalysisResult objects (ssim, resnet, etc.)
+        image_results: List of ImageAnalysisResult objects (ssim, resnet, color, etc.)
         text_res: Dict from TextAnalysisResult
 
     Returns:
@@ -18,29 +18,41 @@ def make_verdict(
         report: str (human-readable reasoning)
     """
 
-    # ----  Flags ----
-    image_mismatches = [res for res in image_results if res.mismatch]
+    # ---- Extract mismatches ----
+    mismatches = {res.method: res for res in image_results if res.mismatch}
     text_discrepancy = text_res.get("discrepancy", False)
 
-    # ---- Confidence logic ----
-    confidence = 0.5  # base
+    # ---- Confidence base ----
+    confidence = 0.5
+    verdict = "ESCALATE_ADMIN"
 
-    if image_mismatches:
-        confidence += 0.2
+    # ---- Image weighting ----
+    if "color_histogram" in mismatches:
+        confidence += 0.3  # strong signal: buyer says "wrong color"
+    if "ssim" in mismatches:
+        confidence += 0.2  # scratches/structural issues
+    if "resnet" in mismatches:
+        confidence += 0.2  # deeper feature-level mismatch
+
+    # ---- Text weighting ----
     if text_discrepancy:
         confidence += 0.2
-    if len(image_mismatches) == len(image_results) and text_discrepancy:
-        confidence += 0.1  # strong signal if *everything* disagrees
 
     confidence = min(confidence, 1.0)
 
-    # ---- Verdict ----
-    if image_mismatches and text_discrepancy:
+    # ---- Verdict logic ----
+    if mismatches and text_discrepancy:
         verdict = "REFUND_BUYER"
-    elif not image_mismatches and not text_discrepancy:
-        verdict = "RELEASE_SELLER"
+    elif mismatches and not text_discrepancy:
+        # If only color mismatch but text matches → still refund buyer
+        if "color_histogram" in mismatches:
+            verdict = "REFUND_BUYER"
+        else:
+            verdict = "ESCALATE_ADMIN"
+    elif not mismatches and text_discrepancy:
+        verdict = "REFUND_BUYER"
     else:
-        verdict = "ESCALATE_ADMIN"
+        verdict = "RELEASE_SELLER"
 
     # ---- Report ----
     img_parts = [

@@ -6,12 +6,9 @@ import numpy as np
 from skimage.metrics import structural_similarity as ssim
 from PIL import Image
 
-# Pretrained ResNet18 for feature extraction
+# ---------- ResNet Feature Extractor ----------
 _resnet = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-# Remove classifier by replacing with identity function (not changing the layer type)
-_resnet.fc = torch.nn.Linear(_resnet.fc.in_features, _resnet.fc.in_features)
-_resnet.fc.weight.data = torch.eye(_resnet.fc.in_features)
-_resnet.fc.bias.data = torch.zeros(_resnet.fc.in_features)
+_resnet = torch.nn.Sequential(*list(_resnet.children())[:-1])  # cut classifier
 _resnet.eval()
 
 _transform: T.Compose = T.Compose([
@@ -21,31 +18,56 @@ _transform: T.Compose = T.Compose([
                 std=[0.229, 0.224, 0.225])
 ])
 
+# ---------- SSIM ----------
 def ssim_compare_images(path1: str, path2: str) -> float:
     img1 = cv2.imread(path1, cv2.IMREAD_GRAYSCALE)
     img2 = cv2.imread(path2, cv2.IMREAD_GRAYSCALE)
     if img1 is None or img2 is None:
         return 0.0
+
     img1 = cv2.resize(img1, (256, 256))
     img2 = cv2.resize(img2, (256, 256))
-    score = ssim(img1, img2, full=True)[0]
+
+    result = ssim(img1, img2, full=True)
+    if isinstance(result, tuple):
+        score, _ = result  # newer versions return (score, diff)
+    else:
+        score = result     # fallback if only a float is returned
+
     return float(score)
 
+
+# ---------- ResNet Cosine ----------
 def resnet_cosine_pair(path1: str, path2: str) -> float:
     try:
-        # Load and transform images to tensors
-        img1_tensor = _transform(Image.open(path1).convert("RGB"))
-        img2_tensor = _transform(Image.open(path2).convert("RGB"))
-        
-        # Add batch dimension using torch.unsqueeze with explicit type casting
-        img1_batch = torch.unsqueeze(img1_tensor, 0)  # type: ignore
-        img2_batch = torch.unsqueeze(img2_tensor, 0)  # type: ignore
+        def _extract(path: str):
+            img = Image.open(path).convert("RGB")
+            tensor = _transform(img).unsqueeze(0)
+            with torch.no_grad():
+                feat = _resnet(tensor).squeeze().numpy()
+            return feat / np.linalg.norm(feat)
+
+        v1 = _extract(path1)
+        v2 = _extract(path2)
+        return float(np.dot(v1, v2))
     except Exception:
         return 0.0
 
-    with torch.no_grad():
-        feat1 = _resnet(img1_batch).numpy().flatten()
-        feat2 = _resnet(img2_batch).numpy().flatten()
+# ---------- Color Histogram ----------
+def compare_color_histograms(path1: str, path2: str) -> float:
+    img1 = cv2.imread(path1)
+    img2 = cv2.imread(path2)
+    if img1 is None or img2 is None:
+        return 0.0
 
-    cos = np.dot(feat1, feat2) / (np.linalg.norm(feat1) * np.linalg.norm(feat2))
-    return float(cos)
+    hsv1 = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
+    hsv2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
+
+    hist1 = cv2.calcHist([hsv1], [0, 1], None, [50, 60], [0, 180, 0, 256])
+    hist2 = cv2.calcHist([hsv2], [0, 1], None, [50, 60], [0, 180, 0, 256])
+
+    cv2.normalize(hist1, hist1, 0, 1, cv2.NORM_MINMAX)
+    cv2.normalize(hist2, hist2, 0, 1, cv2.NORM_MINMAX)
+
+    score = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
+    return float(score)

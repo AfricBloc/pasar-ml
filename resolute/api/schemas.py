@@ -41,11 +41,12 @@ class AnalyzeResponse(BaseModel):
     productId: str
     verdict: VerdictEnum
     confidenceScore: float
-    imageAnalysis: List[ImageAnalysisResult] = []  
+    imageAnalysis: List[ImageAnalysisResult] = [] 
     textAnalysis: Optional[TextAnalysisResult] = None
     analysisReport: str
     buyerEvidence: List[EvidenceItem] = []
     sellerEvidence: List[EvidenceItem] = []
+
 
 class SubmitVerdictRequest(BaseModel):
     orderId: str
