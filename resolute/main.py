@@ -1,30 +1,41 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from shared.config.settings import settings
 from shared.logging.logger import logger
+from resolute.api.routes import router as resolute_router
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
-app = FastAPI(title="Resolute Engine", description="Dispute resolution agent for Pasar", version="0.1")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Resolute Engine started", extra={"env": settings.ENVIRONMENT})
+    yield
 
-# 📦 Pydantic model for dispute analysis
-class DisputeRequest(BaseModel):
-    dispute_id: str
-    buyer_claim: str
-    seller_response: str
-
-@app.on_event("startup")
-def startup_event():
-    logger.info("🚀 Resolute Engine started in %s mode", settings.ENVIRONMENT)
+app = FastAPI(
+    title="Resolute Engine",
+    description="Dispute resolution agent for Pasar",
+    version="0.1",
+    lifespan=lifespan
+)
 
 @app.get("/")
 def health_check():
     return {"status": "ok", "service": "Resolute", "env": settings.ENVIRONMENT}
 
-@app.post("/resolute/analyze")
-def analyze_dispute(request: DisputeRequest):
-    logger.info("Resolute analyzing dispute %s", request.dispute_id)
-    # MVP placeholder: dummy verdict logic
-    verdict = "escalate" if "damage" in request.buyer_claim.lower() else "reject"
-    return {"agent": "Resolute", "dispute_id": request.dispute_id, "verdict": verdict}
+@app.middleware("http")
+async def add_request_context(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as e:
+        logger.exception(
+            f"Unhandled exception at {request.url.path}: {e}",
+            exc_info=True,  # ensures traceback is included
+            extra={"path": request.url.path, "error": str(e), "type": type(e).__name__}
+        )
+        return JSONResponse({"detail": "Internal Server Error"}, status_code=500)
+
+# All API endpoints live in routes.py
+app.include_router(resolute_router, prefix="/resolute", tags=["resolute"])

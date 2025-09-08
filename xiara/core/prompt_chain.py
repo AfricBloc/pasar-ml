@@ -15,6 +15,15 @@ from xiara.core.memory_manager import get_memory
 from xiara.core.ambiguity_detector import AmbiguityDetector
 import re
 from xiara.core.memory_manager import get_last_query, set_last_query
+from xiara.core.memory_manager import (
+    get_memory,
+    set_last_query,
+    get_last_query,
+    clear_last_query,
+    cache_search_result,
+    get_cached_result,
+    clear_cached_result,
+)
 # Load env vars
 load_dotenv()
 DATA_PATH = os.getenv("DATA_PATH")
@@ -118,6 +127,10 @@ def update_user_history(user_id: str, query: str):
 
 def handle_product_query(query: str, user_id: str) -> str:
     """Main handler with ambiguity, multi-product, context updates, and RAG toggle."""
+    # Check cache first
+    cached = get_cached_result(query)
+    if cached:
+        return f"(cached)\n{cached}"
     # Check for ambiguity first
     is_ambiguous, ambiguity_type = ambiguity_detector.is_ambiguous(query, user_id=user_id)
     if is_ambiguous:
@@ -195,6 +208,7 @@ def handle_product_query(query: str, user_id: str) -> str:
         final = "Here's what I found for you:\n\n"
         for sub_q, ans in all_responses:
             final += f"For **{sub_q}**:\n{ans}\n\n"
+        cache_search_result(query, final)
         return final.strip()
 
 
