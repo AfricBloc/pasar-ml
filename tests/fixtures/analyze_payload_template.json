@@ -1,0 +1,12 @@
+{
+  "orderId": "ORD123",
+  "productId": "PROD456",
+  "disputeDetails": {
+    "buyer_image_paths": ["tests/fixtures/buyer/sample_buyer_image.png"],
+    "seller_image_paths": ["tests/fixtures/seller/sample_seller_image.png"],
+    "claim_text": "The phone I received was scratched and blue, not black.",
+    "product_description": "iPhone 12, black, mint condition, lightly used.",
+    "buyer_submitted_at": "2025-08-20T10:01:00Z",
+    "seller_listed_at": "2025-08-18T08:00:00Z"
+  }
+}

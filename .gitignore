@@ -53,9 +53,6 @@ data/processed/\*
 data/raw/\*.csv
 data/processed/\*.csv
 
-# Local data & fixtures
-tests/fixtures/*.png
-tests/fixtures/*.jpg
-tests/fixtures/*.jpeg
+# Keep template fixture, ignore real ones
 tests/fixtures/*.json
-data/
+!tests/fixtures/analyze_payload_template.json
