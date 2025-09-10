@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Header, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from typing import Optional, List
 from .schemas import (
     AnalyzeRequest, AnalyzeResponse, SubmitVerdictRequest,
@@ -6,11 +7,7 @@ from .schemas import (
 )
 from resolute.logic.verdict_engine import make_verdict
 from resolute.api.evidence_fetcher import load_local_images
-from resolute.analyzers.image_analyzer import (
-    ssim_compare_images,
-    resnet_cosine_pair,
-    compare_color_histograms
-)
+from resolute.analyzers.image_analyzer import ssim_compare_images, resnet_cosine_pair, compare_color_histograms
 from resolute.analyzers.text_checker import analyze_claim_vs_description
 from shared.auth.auth_utils import verify_internal_token    
 from shared.logging.logger import logger
@@ -18,17 +15,21 @@ from shared.config.settings import settings
 
 router = APIRouter()
 
-def auth_guard(authorization: Optional[str] = Header(None)):
-    if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(status_code=401, detail="Missing bearer token")
-    token = authorization.split(" ", 1)[1]
+# Swagger-aware Bearer scheme
+bearer_scheme = HTTPBearer()
 
-    # Dev-mode bypass for local testing
-    if settings.ENVIRONMENT == "dev" and token == "test-token":
+def auth_guard(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+    token = credentials.credentials if credentials else None
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing bearer token")
+
+    # Dev-mode bypass
+    if settings.ENVIRONMENT == "development" and token == "test-token":
         logger.info("Dev token accepted for testing")
         return True
 
-    # Normal path → real validation
+    # Normal validation
     mock_request = Request(scope={
         "type": "http",
         "headers": [(b"authorization", f"Bearer {token}".encode())]
@@ -37,8 +38,8 @@ def auth_guard(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=403, detail="Invalid token")
     return True
 
-@router.post("/analyze", response_model=AnalyzeResponse)
-def analyze(req: AnalyzeRequest, _: bool = Depends(auth_guard)):
+@router.post("/analyze", response_model=AnalyzeResponse, dependencies=[Depends(auth_guard)])
+def analyze(req: AnalyzeRequest):
     logger.info("Analyze request received", extra={"orderId": req.orderId, "productId": req.productId})
    
     try:
@@ -52,20 +53,17 @@ def analyze(req: AnalyzeRequest, _: bool = Depends(auth_guard)):
     image_results: List[ImageAnalysisResult] = []
 
     if buyer_items and seller_items:
-        buyer_path = buyer_items[0].path
-        seller_path = seller_items[0].path
-
-        # --- SSIM ---
-        ssim_score = ssim_compare_images(buyer_path, seller_path)
+        # SSIM
+        ssim_score = ssim_compare_images(buyer_items[0].path, seller_items[0].path)
         image_results.append(ImageAnalysisResult(
             method="ssim",
             score=ssim_score,
             mismatch=ssim_score < 0.5
         ))
 
-        # --- ResNet cosine ---
+        # ResNet cosine
         try:
-            cos_score = resnet_cosine_pair(buyer_path, seller_path)
+            cos_score = resnet_cosine_pair(buyer_items[0].path, seller_items[0].path)
             image_results.append(ImageAnalysisResult(
                 method="resnet",
                 score=cos_score,
@@ -74,24 +72,22 @@ def analyze(req: AnalyzeRequest, _: bool = Depends(auth_guard)):
         except Exception as e:
             logger.warning("ResNet skipped", extra={"reason": str(e)})
 
-        # --- Color Histogram ---
+        # Color histogram
         try:
-            color_score = compare_color_histograms(buyer_path, seller_path)
+            hist_score = compare_color_histograms(buyer_items[0].path, seller_items[0].path)
             image_results.append(ImageAnalysisResult(
-                method="color_histogram",
-                score=color_score,
-                mismatch=color_score < 0.75   # threshold for color mismatch
+                method="color_hist",
+                score=hist_score,
+                mismatch=hist_score < 0.7
             ))
         except Exception as e:
-            logger.warning("Color histogram skipped", extra={"reason": str(e)})
+            logger.warning("Color hist skipped", extra={"reason": str(e)})
 
-    # --- Text Analysis ---
     text_res = analyze_claim_vs_description(
         req.disputeDetails.claim_text, 
         req.disputeDetails.product_description
     )
 
-    # --- Verdict ---
     verdict, confidence, report = make_verdict(image_results, text_res.dict())
 
     resp = AnalyzeResponse(
@@ -113,7 +109,7 @@ def analyze(req: AnalyzeRequest, _: bool = Depends(auth_guard)):
     })
     return resp
 
-@router.post("/verdict")
-def submit_verdict(req: SubmitVerdictRequest, _: None = Depends(auth_guard)):
+@router.post("/verdict", dependencies=[Depends(auth_guard)])
+def submit_verdict(req: SubmitVerdictRequest):
     logger.info("Verdict submitted", extra=req.dict())
     return {"status": "accepted", "orderId": req.orderId}

@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from shared.config.settings import settings
 from shared.logging.logger import logger
@@ -7,6 +9,9 @@ from resolute.api.routes import router as resolute_router
 from contextlib import asynccontextmanager
 
 load_dotenv()
+
+# --- Define Security scheme for Swagger ---
+bearer_scheme = HTTPBearer(auto_error=False)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -17,7 +22,17 @@ app = FastAPI(
     title="Resolute Engine",
     description="Dispute resolution agent for Pasar",
     version="0.1",
-    lifespan=lifespan
+    lifespan=lifespan,
+    swagger_ui_parameters={"persistAuthorization": True},  # keep token between reloads
+)
+
+# (optional) Allow Swagger UI to send headers from localhost/other ports
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # tighten later for security
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/")
@@ -32,7 +47,7 @@ async def add_request_context(request: Request, call_next):
     except Exception as e:
         logger.exception(
             f"Unhandled exception at {request.url.path}: {e}",
-            exc_info=True,  # ensures traceback is included
+            exc_info=True,
             extra={"path": request.url.path, "error": str(e), "type": type(e).__name__}
         )
         return JSONResponse({"detail": "Internal Server Error"}, status_code=500)
