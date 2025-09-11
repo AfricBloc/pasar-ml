@@ -1,18 +1,13 @@
-
-
-## 📄 **CONTRIBUTING.md**
-
+---
 # 🤝 Contributing to Pasar ML Agents
 
-Welcome to the **Pasar ML Agents** project!  
-This repo contains the AI agents that power Pasar — Xiara, Shogun, Resolute, and Xena.
-
+Welcome to the **Pasar ML Agents** project!
+This repo contains the AI agents that power Pasar — **Xiara, Shogun, Resolute, and Xena**.
 ---
 
 ## 📦 Project Structure
 
 ```
-
 pasar-ml-agents/
 ├── xiara/         # Buyer conversational agent
 ├── shogun/        # Security & anomaly detection
@@ -25,24 +20,22 @@ pasar-ml-agents/
 ├── requirements.txt
 ├── Makefile
 └── CONTRIBUTING.md
-
-````
+```
 
 ---
 
 ## 🚀 Developer Setup Guide
 
-### 1️⃣ **Clone the Repository**
+### 1️⃣ Clone the Repository
+
 ```bash
 git clone https://github.com/AfricBloc/pasar-ml.git
 cd pasar-ml
-````
+```
 
----
+### 2️⃣ Create Your Virtual Environment
 
-### 2️⃣ **Create Your Virtual Environment**
-
-Use Python 3.11 (recommended).
+Use **Python 3.11** (recommended).
 
 ```bash
 python -m venv venv
@@ -50,29 +43,21 @@ source venv/bin/activate      # Mac/Linux
 venv\Scripts\activate         # Windows
 ```
 
----
-
-### 3️⃣ **Install Dependencies**
+### 3️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-(Dependencies include FastAPI, Pydantic, LangChain, Redis, etc.)
-
----
-
-### 4️⃣ **Copy and Configure .env**
+### 4️⃣ Copy and Configure `.env`
 
 ```bash
 cp .env.example .env
 ```
 
-* Add API keys, DB URLs, and blockchain credentials (if needed).
+Fill in API keys, DB URLs, blockchain credentials as needed.
 
----
-
-### 5️⃣ **Run Services (Development Mode)**
+### 5️⃣ Run Services (Dev Mode)
 
 Each agent is a FastAPI app:
 
@@ -81,13 +66,9 @@ cd xiara
 uvicorn main:app --reload --port 8001
 ```
 
-Do the same for **Shogun, Resolute, Xena** (ports 8002–8004).
+Repeat for **Shogun, Resolute, Xena** (ports 8002–8004).
 
----
-
-### 6️⃣ **Run via Docker Compose**
-
-Make sure Docker is installed, then:
+### 6️⃣ Run via Docker Compose
 
 ```bash
 docker-compose up --build
@@ -98,24 +79,22 @@ docker-compose up --build
 ✅ Resolute → `http://localhost:8003`
 ✅ Xena → `http://localhost:8004`
 
----
-
-### 7️⃣ **Run Notebooks for ML Work**
+### 7️⃣ Run Notebooks
 
 ```bash
 jupyter notebook
 ```
 
-Open `notebooks/` folder and start experimenting.
+Open `notebooks/` folder to experiment with ML.
 
 ---
 
 ## 🔀 Branch Workflow
 
-* **`main`** → Always production-ready code.
-* **`dev`** → Active development branch.
+- **`main`** → Production-ready code only.
+- **`dev`** → Active development branch.
 
-**For new features:**
+For new features:
 
 ```bash
 git checkout dev
@@ -123,22 +102,28 @@ git pull origin dev
 git checkout -b feature/<feature-name>
 ```
 
+⚡ **Note:** All PRs into `dev` must pass **CI checks** before merge:
+
+- ✅ Unit tests
+- ✅ Linting (PEP8/Black)
+- ✅ Docker build
+
 ---
 
 ## 📜 Commit Guidelines (Conventional Commits)
 
 Use [Conventional Commit](https://www.conventionalcommits.org/) style:
 
-* `feat:` → New feature (e.g. `feat: add dispute analysis endpoint`)
-* `fix:` → Bug fix
-* `docs:` → Documentation only
-* `refactor:` → Code refactor without feature change
-* `chore:` → Build, config, or maintenance
+- `feat:` → New feature
+- `fix:` → Bug fix
+- `docs:` → Documentation only
+- `refactor:` → Code refactor
+- `chore:` → Build/config/maintenance
 
 **Examples:**
 
 ```bash
-git commit -m "feat: add login anomaly detection MVP"
+git commit -m "feat: add dispute analysis endpoint"
 git commit -m "docs: update contributing guide"
 ```
 
@@ -146,18 +131,24 @@ git commit -m "docs: update contributing guide"
 
 ## ✅ Code Style
 
-* **Python:** Follow **PEP8**
-* Use **type hints** for all functions
-* Use **Pydantic models** for request/response schemas in FastAPI
+- Follow **PEP8**
+- Use **type hints** everywhere
+- Use **Pydantic models** for request/response schemas
 
 ---
 
 ## 🔍 Pull Request Guidelines
 
-1. **Base branch:** Always `dev`.
-2. Write a **clear title & description**.
-3. Request review from another team member.
-4. Ensure all CI checks pass before merge.
+1. Base branch = `dev`
+2. Clear title + description (Conventional Commits)
+3. Request review from another team member
+4. Ensure all CI checks pass:
+
+   - `pytest`
+   - `flake8` + `black`
+   - Docker build stage
+
+5. After approval + passing CI → **Squash Merge** into `dev`
 
 ---
 
@@ -168,9 +159,8 @@ make up         # Start all Docker services
 make down       # Stop containers
 make logs       # View logs
 make rebuild    # Full rebuild
+make test       # Run pytest suite
 ```
-
-(Use `Makefile` or run Docker Compose commands directly.)
 
 ---
 
@@ -178,19 +168,11 @@ make rebuild    # Full rebuild
 
 For questions or discussions:
 
-* Open an issue on GitHub
-* Or contact the team lead via Slack/Email
+- Open an issue on GitHub
+- Or contact the team lead via Slack/Email
 
 ---
 
 Thanks for contributing to **Pasar ML Agents**! 🚀
-
-```
-
----
-
-✅ **This file does double duty:**  
-- It’s a **Contributing Guide** for team members (how to work with the repo).  
-- It’s also a **Developer Setup Guide** (clear steps to clone, install, run).
 
 ---

@@ -1,3 +1,9 @@
+# Resolute Engine
+
+[![CI](https://github.com/AfricBloc/pasar-ml/actions/workflows/ci.yml/badge.svg)](https://github.com/AfricBloc/pasar-ml/actions/workflows/ci.yml)
+
+Dispute resolution agent for Pasar (FastAPI + ML analyzers).
+
 # 🛍️ Pasar ML Agents
 
 Pasar is an **AI-powered marketplace infrastructure** designed for the next generation of commerce.
@@ -9,10 +15,10 @@ This repository contains the **machine learning (ML)** and **agentic services** 
 
 Pasar is built on a **multi-agent architecture**, where each agent handles a critical part of the marketplace:
 
-* 🤖 **Xiara** – Conversational AI for buyers (product search, negotiation)
-* 🛡 **Shogun** – Security & anomaly detection (logins, fraud detection)
-* ⚖️ **Resolute** – Automated dispute resolution (image & text evidence analysis)
-* 💸 **Xena** – Smart wallet assistant for sellers (funds management & reports)
+- 🤖 **Xiara** – Conversational AI for buyers (product search, negotiation)
+- 🛡 **Shogun** – Security & anomaly detection (logins, fraud detection)
+- ⚖️ **Resolute** – Automated dispute resolution (image & text evidence analysis)
+- 💸 **Xena** – Smart wallet assistant for sellers (funds management & reports)
 
 These agents connect to the **Pasar backend services** (orders, products, disputes, wallet) and interact with **smart contracts** for escrow, access management, and wallet control.
 
@@ -43,24 +49,30 @@ PostgreSQL (Future DB Layer)
 
 ### 🤖 **Xiara** – Conversational AI Agent
 
-* Product discovery & natural language search
-* Negotiation using rules + LLM prompts
-* Triggers payment flows
+- Product discovery & natural language search
+- Negotiation using rules + LLM prompts
+- Triggers payment flows
 
 ### 🛡 **Shogun** – Security Agent
 
-* Detects suspicious logins & transactions
-* Can flag users or pause escrow contracts
+- Detects suspicious logins & transactions
+- Can flag users or pause escrow contracts
 
 ### ⚖️ **Resolute** – Dispute Resolution Engine
 
-* Uses CV + NLP to assess disputes
-* Returns verdicts (refund buyer, reject, escalate)
+- Uses CV + NLP to assess disputes
+- Returns verdicts (refund buyer, reject, escalate)
+
+# Resolute Engine
+
+![CI](https://github.com/AfricBloc/pasar-ml/actions/workflows/ci.yml/badge.svg)
+
+Dispute resolution agent for Pasar (FastAPI + ML analyzers).
 
 ### 💸 **Xena** – Smart Wallet Manager
 
-* Parses text/voice commands from sellers
-* Handles transactions & generates reports
+- Parses text/voice commands from sellers
+- Handles transactions & generates reports
 
 ---
 
@@ -150,23 +162,23 @@ pasar-ml-agents/
 
 ## 🔗 Key Technologies
 
-* **FastAPI** – API framework for all agents
-* **LangChain + Hugging Face** – LLM orchestration for Xiara & Xena
-* **OpenCV + SpaCy** – CV/NLP dispute resolution for Resolute
-* **Scikit-learn + XGBoost** – Anomaly detection for Shogun
-* **Redis + Celery** – Caching & async tasks
-* **Web3.py** – Smart wallet & escrow contract control
-* **Docker & Docker Compose** – Local and production orchestration
-* **GitHub Actions** – CI/CD workflow
+- **FastAPI** – API framework for all agents
+- **LangChain + Hugging Face** – LLM orchestration for Xiara & Xena
+- **OpenCV + SpaCy** – CV/NLP dispute resolution for Resolute
+- **Scikit-learn + XGBoost** – Anomaly detection for Shogun
+- **Redis + Celery** – Caching & async tasks
+- **Web3.py** – Smart wallet & escrow contract control
+- **Docker & Docker Compose** – Local and production orchestration
+- **GitHub Actions** – CI/CD workflow
 
 ---
 
 ## 🧪 Development Notes
 
-* ✅ All agents load environment variables from `.env` via `shared/config/settings.py`.
-* ✅ Consistent logging is handled by `shared/logging/logger.py`.
-* ✅ Internal API calls are protected by a shared token (`shared/auth/auth_utils.py`).
-* ✅ Placeholder tests in `/tests` ensure CI runs cleanly.
+- ✅ All agents load environment variables from `.env` via `shared/config/settings.py`.
+- ✅ Consistent logging is handled by `shared/logging/logger.py`.
+- ✅ Internal API calls are protected by a shared token (`shared/auth/auth_utils.py`).
+- ✅ Placeholder tests in `/tests` ensure CI runs cleanly.
 
 ---
 
@@ -177,11 +189,13 @@ pasar-ml-agents/
    ```bash
    git checkout -b feature/<name>
    ```
+
 2. **Follow Conventional Commits**
 
-   * `feat:` new feature
-   * `fix:` bug fix
-   * `chore:` setup, dependencies
+   - `feat:` new feature
+   - `fix:` bug fix
+   - `chore:` setup, dependencies
+
 3. **Write tests** for new endpoints and modules.
 4. **Open a Pull Request** to `dev` branch for review.
 

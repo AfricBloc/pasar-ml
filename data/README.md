@@ -1,4 +1,3 @@
-
 # 📊 Pasar Data Folder
 
 This folder stores **datasets, sample files, and reference data** used for Pasar ML agents.
@@ -34,12 +33,21 @@ data/
 └── samples/
 └── tiny\_orders.json
 
-````
+```
+
+data/
+├── buyer/ # Buyer-uploaded evidence (mock images, claims, etc.)
+├── seller/ # Seller listing evidence (mock images, descriptions, etc.)
+├── samples/ # Small demo/test assets safe to commit
+├── raw/ # Large unprocessed datasets (ignored in git)
+└── processed/ # Preprocessed datasets (ignored in git)
 
 ---
 
 ## ✅ Notes
-- Any ML notebooks should reference files **relative to the repo root**:  
+
+- Any ML notebooks should reference files **relative to the repo root**:
+
 ```python
 df = pd.read_csv("data/samples/tiny_orders.json")
-````
+```
